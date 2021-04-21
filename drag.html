@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <style>
+      .caixa {
+        width: 50px;
+        height: 50px;
+        background-color: #b9f;
+        border: 2px solid black;
+      }
+
+      .zona {
+        float: left;
+        margin-right: 1em;
+        width: 100px;
+        height: 100px;
+        border: thick dashed;
+      }
+
+      .red {
+        border-color: #f33;
+      }
+      .blue {
+        border-color: #33f;
+      }
+
+      .zona-over {
+        opacity: 0.5;
+      }
+
+      .black {
+        background-color: black;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="zona1" class="zona red">
+      <div id="caixa" class="caixa" draggable="true"></div>
+    </div>
+    <div id="zona2" class="zona blue"></div>
+  </body>
+</html>
+
+<script>
+  onload = () => {
+    caixa.ondragstart = (e) => {
+      e.dataTransfer.setData("text", e.target.id);
+    };
+
+    caixa.ondragend = (e) => {};
+
+    caixa.ondragover = (e) => {
+      e.preventDefault();
+    };
+
+    let zonas = document.querySelectorAll(".zona");
+
+    for (let i = 0; i < zonas.length; i++) {
+      let zona = zonas[i];
+
+      //CASO ESTE MÉTODO NÃO ESTIVESSEM PRESENTES, O EVENTO ON DROP NÃO SERIA CHAMADO..
+
+      zona.ondragover = (e) => {
+        e.preventDefault();
+      };
+      zona.ondragleave = (e) => {
+        e.preventDefault();
+      };
+      zona.ondrop = function (e) {
+        e.preventDefault();
+        let idCaixa = e.dataTransfer.getData("text");
+        const elem = document.getElementById(idCaixa);
+        zona.appendChild(elem);
+      };
+    }
+  };
+</script>
