@@ -14,6 +14,10 @@
     <p><button id="btnBd">Incluir</button></p>
     <p><button id="btnBl">Ler</button></p>
     <p><button id="btnBr">Remove</button></p>
+    <p><button id="btnBnl">Listagem</button></p>
+    <p><button id="btnBtcur">Teste Cursor</button></p>
+    <p><button id="btnBtlt">Ler por título</button></p>
+
     <p id="output"></p>
   </body>
 </html>
@@ -34,8 +38,11 @@
   reqDb.onupgradeneeded = (evento) => {
     bd = evento.target.result;
 
-    if (!bd.objectStoreNames.contains("livros"))
-      bd.createObjectStore("livros", { keyPath: "id" });
+    if (!bd.objectStoreNames.contains("livros")) {
+      let livrosOs = bd.createObjectStore("livros", { keyPath: "id" });
+      livrosOs.createIndex("tituloIdx", "titulo", { unique: false });
+      livrosOs.createIndex("autorIdx", "autor", { unique: false });
+    }
   };
 
   reqDb.onerror = () => {
@@ -45,7 +52,7 @@
   onload = () => {
     btnBd.onclick = () => {
       let livro = {
-        id: idLivro.value,
+        id: +idLivro.value,
         titulo: titulo.value,
         autor: autor.value,
       };
@@ -58,7 +65,7 @@
       bd
         .transaction(["livros"], "readonly")
         .objectStore("livros")
-        .get(idLivro.value).onsuccess = (evento) => {
+        .get(+idLivro.value).onsuccess = (evento) => {
         output.innerHTML = evento.target.result.titulo;
       };
     };
@@ -67,7 +74,41 @@
       bd
         .transaction(["livros"], "readwrite")
         .objectStore("livros")
-        .delete(idLivro.value).onsuccess = (evento) => {};
+        .delete(+idLivro.value).onsuccess = (evento) => {};
     };
+
+    btnBnl.onclick = () => {
+      bd
+        .transaction("livros")
+        .objectStore("livros")
+        .getAll(IDBKeyRange.bound("1", "3")).onsuccess = (evento) => {
+        console.log("livros", evento.target.result);
+      };
+    };
+
+    btnBtcur.onclick = () => {
+      bd.transaction("livros").objectStore("livros").openCursor().onsuccess = (
+        evento
+      ) => {
+        let cursor = evento.target.result;
+
+        if (cursor) {
+          console.log(cursor.value);
+          cursor.continue();
+        }
+      };
+    };
+
+    btnBtlt.onclick = () => {
+      bd
+        .transaction("livros")
+        .objectStore("livros")
+        .index("tituloIdx")
+        .get(titulo.value).onsuccess = (evento) => {
+        console.log(evento.target.result);
+      };
+    };
+
+    btnBtlt;
   };
 </script>
